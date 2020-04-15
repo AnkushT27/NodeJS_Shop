@@ -2,8 +2,12 @@ const Product = require('../models/product');
 
 const addProduct = (req,res,next)=>{
     const p = new Product(null,req.body.title,req.body.price,req.body.url,req.body.desc);
-    p.save();
-    res.redirect('/')
+    p.save().then(
+        ()=>{
+            res.redirect('/')
+        }
+    ).catch()
+   
 }
 
 const addProductForm = (req,res,next)=>{

@@ -1,23 +1,4 @@
-const productsArray = [];
-const path = require('path');
-const rootdir = require('../util/path')
-const fs = require('fs');
-const p = path.join(rootdir,'data','products.json');
-const readContentsFromFile = cb =>{
-    let products = []
-    fs.readFile(p,(err,data)=>{
-        console.log('err',err,'data',data)
-        if(!err){
-            products= JSON.parse(data);
-            //my callback function
-             cb(products);
-        }
-        else{
-        cb([]);
-        }
-    })
-}
-
+const db  = require('../util/db');
 module.exports = class Products{
     constructor(id,title,price,url,desc){
         this.id = id;
@@ -29,42 +10,15 @@ module.exports = class Products{
 
     save()
     {
-     readContentsFromFile((products)=>{
-         console.log('my id',this.id)
-        if(this.id){
-          let productIndex = products.findIndex((val)=>{ return val.id == this.id})
-          let updatedProductsArray = [...products];
-          updatedProductsArray[productIndex] = this;
-          console.log('updatedProductsArray',updatedProductsArray)
-          fs.writeFile(p,JSON.stringify(updatedProductsArray),(err)=>{
-            console.log(err);
-        })
-        }
-        else{
-        this.id = Math.random().toPrecision(1).toString();
-        products.push(this);
-        fs.writeFile(p,JSON.stringify(products),(err)=>{
-            console.log(err);
-        })
-     }
+     return db.execute('INSERT INTO PRODUCTS (title,price,url,description) VALUES (?,?,?,?)',[this.title,this.price,this.url,this.desc]);
+    } 
 
-    })
-  } 
-
-    static fetchAll(cb){
-       readContentsFromFile(cb)
+    static fetchAll(){
+       return db.execute('SELECT * FROM PRODUCTS');
     }
 
-    static fetchById(id,cb){
-      
-       readContentsFromFile((data)=>{
-            var product = data.find((val)=>{
-                return val.id == id 
-                
-            });
-          cb(product);
-      })
-     
+    static fetchById(id){
+        return db.execute('SELECT * FROM PRODUCTS where PRODUCTS.ID = ?',[id]);
     }
 
     static delete(id){

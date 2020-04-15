@@ -2,6 +2,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const dbpool = require('./util/db');
 const adminRoute = require('./routes/admin');
 const shopRoute = require('./routes/shop');
 const handlebar = require('express-handlebars');
@@ -21,6 +22,5 @@ app.use('/admin',adminRoute.adminRouter); //route filter /admin/.. added
 app.use(shopRoute);
 
 app.use(notFoundController.NotFoundConroller)
-
 
 app.listen(3000);

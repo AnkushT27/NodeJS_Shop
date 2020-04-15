@@ -2,10 +2,12 @@ const adminData = require('../controllers/admin');
 const Products = require('../models/product');
 const Shop = require('../models/shop');
 exports.productList = (req,res,next)=>{
-   let products = Products.fetchAll((products)=>{
-    console.log('my products',products)
-    res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop'});
-});
+   Products.fetchAll().then(
+       ([rows,meta])=>{
+        res.render('shop/product-list.ejs',{products:rows,path:'/',hasProducts:rows.length>0,pagetitle:'My Shop'});
+       }
+   ).catch();
+
 }
 
 exports.products = (req,res,next)=>{
@@ -59,8 +61,11 @@ exports.orders = (req,res,next)=>{
 
 exports.productDetails = (req,res,next)=>{
   let id = req.params.productId;
- Products.fetchById(id,(product)=>{
-     res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product});
-    })
+ Products.fetchById(id).then(
+     ([[row],meta])=>{
+        res.render('shop/product-detail.ejs',{pagetitle:"Details",product:row});
+     }
+ ).catch()
+  
 }
 
