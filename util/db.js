@@ -1,14 +1,10 @@
 //contains db connection logic
-const mysql = require('mysql2');
+const Sequelize = require('sequelize').Sequelize;
 
-//DB crdentials
-const connection = mysql.createPool({
+const sequelize = new Sequelize('nodejs_db','nodejs','node',{
   host:'localhost',
-  user:'nodejs',
-  database:'nodejs_db',
-  password:'node'
-});
-
+ dialect:'mysql'
+})
 
 //return a promised connection pool
-module.exports = connection.promise()
+module.exports = sequelize;

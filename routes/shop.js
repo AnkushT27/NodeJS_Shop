@@ -11,6 +11,7 @@ const shop = require('../controllers/shop');
  router.post('/cart',shop.cart);
  router.post('/delete-cart',shop.deleteFromCart);
  router.get('/orders',shop.orders);
+ router.post('/orders',shop.checkout);
 
 
 module.exports = router;

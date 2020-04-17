@@ -13,8 +13,8 @@
             %>
              <div>
              <li>
-                 <span><%=cart.productName%></span>&nbsp;&nbsp;
-                 <span>(<%=cart.qty%>)</span>
+                 <span><%=cart.title%></span>&nbsp;&nbsp;
+                 <span>(<%=cart.cartitem.quantity%>)</span>
             </li>
              <form action = '/delete-cart' method='POST'>
                  <input type="hidden" name=productId value="<%= cart.id%>"/>
@@ -26,6 +26,9 @@
             %>
         </ul>
     </div>
+    <form action = '/orders' method='POST'>
+       <button type="submit" class="btn">Check OUT</button>
+    </form>
     <%
     }
     else
