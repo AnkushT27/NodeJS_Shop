@@ -14,10 +14,10 @@
              <div>
              <li>
                  <span><%=cart.title%></span>&nbsp;&nbsp;
-                 <span>(<%=cart.cartitem.quantity%>)</span>
+                 <span>(<%=cart.quantity%>)</span>
             </li>
              <form action = '/delete-cart' method='POST'>
-                 <input type="hidden" name=productId value="<%= cart.id%>"/>
+                 <input type="hidden" name=productId value="<%= cart._id%>"/>
                  <button type="submit" class="btn">Delete</button>
              </form>
             </div>

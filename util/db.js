@@ -1,10 +1,31 @@
 //contains db connection logic
-const Sequelize = require('sequelize').Sequelize;
+const mongo = require('mongodb').MongoClient;
 
-const sequelize = new Sequelize('nodejs_db','nodejs','node',{
-  host:'localhost',
- dialect:'mysql'
-})
+let _db;
 
-//return a promised connection pool
-module.exports = sequelize;
+ exports.mongoConnection = (cb) =>{
+ 
+  mongo.connect('mongodb+srv://Ankush-27:test@cluster0-cqcvw.mongodb.net/shop?retryWrites=true&w=majority',{useNewUrlParser:true}).
+  then((conn)=>{
+      if(conn){
+        console.log('conn',conn)
+        //will connect to my db if not exsist will create the same
+        _db = conn.db();
+        cb(conn);
+         
+      }
+
+  }).catch((err)=>{
+    console.log(err);
+    cb(err);
+  })
+}
+
+exports.getdb = () =>{
+  if(_db){
+    return _db;
+  }
+  else{
+    return 'NO db'
+  }
+}
