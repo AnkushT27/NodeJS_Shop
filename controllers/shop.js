@@ -1,9 +1,10 @@
 const adminData = require('../controllers/admin');
 const Products = require('../models/product');
-const User = require('../models/user');
+const Orders = require('../models/order');
+// const User = require('../models/user');
 exports.productList = (req,res,next)=>{
    
-Products.fetchAll().then(
+Products.find().then(
    (products)=>{
       res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop'});
    }).catch((err)=>{
@@ -17,66 +18,92 @@ exports.products = (req,res,next)=>{
 
 exports.deleteFromCart = (req,res,nex)=>{
    console.log('this is called')
-     let productId = req.body.productId;
-     req.user.deleteCart(productId).
-     then((deleteStatus)=>{
-        console.log(deleteStatus)
-         res.redirect('/cart');
-     }).
-     catch((err)=>{
-      console.log(err)
-     })
+   req.user.deleteFromCart(req.body.productId).
+   then((deleted)=>{
+      res.redirect('/cart');
+   }).
+   catch((err)=>{
+      console.log('err',err);
+   })
     
 }
 
 exports.cart = (req,res,next)=>{
    let productId = req.body.productid;
-   let user = req.user;
-   console.log('my product id',productId);
-   Products.fetchByID(productId).then((product)=>{
-   console.log('product id',product);
-   req.user.saveToCart(product,user).then((response)=>{
+    Products.findById(productId).then((product)=>{
+      req.user.addToCart(product).then((response)=>{
          console.log('response',response)
          res.redirect('/cart');
-   }).catch((err)=>{
+       }).catch((err)=>{
       console.log('err',err);
-   })
+     })
 })
 }
 
 exports.cartList = (req,res,next)=>{
-      req.user.fetchCart().then((cartdata)=>{
-         console.log('cartdata',cartdata)
-         res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:cartdata});
-      }).catch((err)=>{
-         console.log('err',err)
-      })
- }
+   req.user.populate('cart.products.productID')
+   .execPopulate()
+   .then((user)=>{
+      console.log('user--->',user.cart.products);
+      res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:user.cart.products});
+   })
+   .catch((err)=>{
+      console.log('err',err);
+   })  
+}
 
 
 exports.orders = (req,res,next)=>{
-   //fetch the associated tables
-   req.user.getOrders().then((order)=>{
-      res.render('shop/orders.ejs',{pagetitle:"Orders",orderArray:order});
-   }).catch((err)=>{
-      console.log('error',err)
+   Orders.find({'user.userId':req.user._id}).then((orders)=>{
+      console.log('orders',orders.products)
+      res.render('shop/orders.ejs',{pagetitle:"Order",orderArray:orders});
    })
 }
 
 exports.checkout = (req,res,next)=>{
-  req.user.checkout().
-  then((response)=>{
-     console.log('response',response)
-     res.redirect('/orders')
-  })
-  .catch((err)=>{
-   console.log('err',err)
-  })
+   req.user.populate('cart.products.productID')
+   .execPopulate()
+   .then((user)=>{
+     const products = user.cart.products.map((value)=>{
+         return {productData:
+            {_id:value.productID._id,
+            title:value.productID.title,
+               price:value.productID.price,
+               url:value.productID.url,
+               description:value.productID.description
+            },
+            quantity:value.quantity}
+      })
+      console.log('product info',products)
+      const order = new Orders({
+         user:{username:req.user.name,
+         userId:req.user
+         },
+         products:products
+        })
+       order.save().then((saved)=>{
+         req.user.cart.products = []
+         req.user.save().then((saved)=>{
+            res.redirect('/orders');
+         }).catch((err)=>{
+            console.log(err);
+         })
+        
+       }).catch((err)=>{
+         console.log('err',err)
+       })
+     
+   }).
+   catch((err)=>{
+      console.log('err',err)
+   })
+
+  
 }
 
 exports.productDetails = (req,res,next)=>{
   let id = req.params.productId;
- Products.fetchByID(id).then(
+ Products.findById(id).then(
      (product)=>{
         console.log('product fetched',product)
         res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product});

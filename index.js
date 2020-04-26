@@ -4,7 +4,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const shopRoute = require('./routes/shop');
 const User = require('./models/user');
-const db = require('./util/db').mongoConnection;
+// const db = require('./util/db').mongoConnection;
+const mongoose = require('mongoose');
 //create the server
 var app = express();
 
@@ -20,29 +21,60 @@ app.use(bodyParser.urlencoded({extended:true}))
 
 //getting the context for the current user
 app.use((req,res,next)=>{
-  User.findById('5e9fc7d04950832b0c3db6a2').then((response)=>{
-    console.log(response);
-    req.user = new User(response.name,response.email,response.cart,response._id)
-    next();
-  }).catch(err=>{
-    console.log(err);
-  }) 
+  mongoose.connect('mongodb+srv://Ankush-27:test@cluster0-cqcvw.mongodb.net/shop?retryWrites=true&w=majority')
+  .then((connected)=>{
+    if(connected){
+      User.findById('5ea44333aa857628d4b66ae7').then(( fetchedUser)=>{
+        
+        if(fetchedUser!=undefined){
+         
+          req.user = fetchedUser;
+          next();
+         }
+        else{
+        
+          const user = new User({
+            name:'test',
+            email:'ankushtiwai102@gmail.com',
+            cart:{
+              products:[]
+            }
+          })
+          user.save().then((saved)=>{
+            req.user = user;
+            next();
+           
+          })
+          .catch(err=>{
+            console.log('my error',err);
+          })
+
+        }
+       
+      })
+      .catch((err)=>{
+
+      })
+       
+    }
+    
+  
+  })
+  .catch((err)=>{
+    console.log('err',err);
+  })
+
+
 });
 
 app.use('/admin',adminRoute.adminRouter); //route filter /admin/.. added
 app.use(shopRoute);
+app.listen(3600);
 //syncs my models to my DB
 
   //app.use(notFoundController.NotFoundConroller)
 
-
-db(response=>{
-  console.log(response)
-  app.listen(3000);  
-})
-
-
-
+  
   
 
 

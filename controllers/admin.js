@@ -3,12 +3,21 @@ const Product = require('../models/product');
 
 
 const addProduct = (req,res,next)=>{
-    const prod = new Product(req.body.title,req.body.price,req.body.url,req.body.description,null,req.user.id);
-    prod.save().this((product)=>{
+    
+    let prod = new Product(
+        {
+        title:req.body.title,
+        price:req.body.price,
+        url:req.body.url,
+        description:req.body.desc,
+        userId:req.user
+        }
+    );
+    
+    prod.save((product)=>{
         console.log('product',product)
-    }).catch((err)=>{
-        console.log('product',err)
-    })
+        res.redirect('/product');
+    });
 }
 
 const addProductForm = (req,res,next)=>{
@@ -16,7 +25,7 @@ const addProductForm = (req,res,next)=>{
 }
 
 const adminProductList = (req,res,next)=>{
-   Product.fetchAll().then((products)=>{
+   Product.find().then((products)=>{
         res.render('admin/list-product.ejs',{products:products,
             pagetitle:"Admin Product List",path:'/admin/add-product'})
     }).
@@ -28,7 +37,7 @@ const adminProductList = (req,res,next)=>{
 const editProductForm = (req,res,next)=>{
     let id = req.query.productid;
     let editMode = req.query.edit;
-    Product.fetchByID(id).then(
+    Product.findById(id).then(
         (product)=>{
             res.render('admin/edit-product.ejs',{
             pagetitle:"Admin Product List",
@@ -43,19 +52,31 @@ const editProductForm = (req,res,next)=>{
 }
 
 const editProduct = (req,res,next)=>{
- new Product(req.body.title,req.body.price,req.body.url,req.body.desc,mongodb.ObjectId(req.body.id)).save()
-  .then((updatdProduct)=>{
-    res.redirect('/admin/product');
-  })
-  .catch((err)=>{
-      console.log(err)
-  })
+    let id = req.body.id;
+    Product.findById(id).then(
+        (product)=>{
+           product.title = req.body.title;
+            product.price = req.body.price;
+            product.url = req.body.url;
+            product.description = req.body.desc;
+           return product.save()
+        })
+        .then(()=>{
+            res.redirect('/admin/product');
+          })
+          .catch((err)=>{
+              console.log(err)
+          })
+        .catch((err)=>{
+            console.log(err)
+        })
+ 
  
  
 }
 const deleteProduct = (req,res,next)=>{
     const deleteID = req.query.productid;
-  Product.delete(deleteID).then(()=>{
+  Product.findByIdAndDelete(deleteID).then(()=>{
     res.redirect('/admin/product');
    })
     .catch((err)=>{
