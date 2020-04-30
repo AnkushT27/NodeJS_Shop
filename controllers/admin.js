@@ -10,7 +10,7 @@ const addProduct = (req,res,next)=>{
         price:req.body.price,
         url:req.body.url,
         description:req.body.desc,
-        userId:req.user
+        userId:req.session.user
         }
     );
     
@@ -21,13 +21,13 @@ const addProduct = (req,res,next)=>{
 }
 
 const addProductForm = (req,res,next)=>{
-   res.render('admin/edit-product.ejs',{pagetitle:"HB Product",path:'/admin/add-product', edit:false})
+   res.render('admin/edit-product.ejs',{pagetitle:"HB Product",path:'/admin/add-product', edit:false,isAuth: req.session.isLoggedin})
 }
 
 const adminProductList = (req,res,next)=>{
    Product.find().then((products)=>{
         res.render('admin/list-product.ejs',{products:products,
-            pagetitle:"Admin Product List",path:'/admin/add-product'})
+            pagetitle:"Admin Product List",path:'/admin/add-product',isAuth: req.session.isLoggedin})
     }).
     catch((err)=>{
         console.log(err);
@@ -44,6 +44,7 @@ const editProductForm = (req,res,next)=>{
             path:'/admin/add-product',
             edit:editMode,
             product:product
+            ,isAuth: req.session.isLoggedin
             })
         })
     .catch((err)=>{

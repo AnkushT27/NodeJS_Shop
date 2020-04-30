@@ -31,7 +31,7 @@ const user = new Schema({
 })
 
 user.methods.addToCart = function(product){
-       let updatedUser = this;
+       
         let exsistingProdId =this.cart.products.findIndex((value)=>{ 
                 if(value){
                

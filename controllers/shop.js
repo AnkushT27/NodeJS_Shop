@@ -1,19 +1,19 @@
 const adminData = require('../controllers/admin');
 const Products = require('../models/product');
 const Orders = require('../models/order');
-// const User = require('../models/user');
+const User = require('../models/user');
 exports.productList = (req,res,next)=>{
    
 Products.find().then(
    (products)=>{
-      res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop'});
+      res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop',isAuth: req.session.isLoggedin});
    }).catch((err)=>{
       console.log(err);
    });
  }
 
 exports.products = (req,res,next)=>{
-  res.render('shop/index.ejs',{pagetitle:'Products'});
+  res.render('shop/index.ejs',{pagetitle:'Products',isAuth: req.session.isLoggedin});
 }
 
 exports.deleteFromCart = (req,res,nex)=>{
@@ -31,7 +31,8 @@ exports.deleteFromCart = (req,res,nex)=>{
 exports.cart = (req,res,next)=>{
    let productId = req.body.productid;
     Products.findById(productId).then((product)=>{
-      req.user.addToCart(product).then((response)=>{
+       console.log('req.session.user',req.session.user)
+req.user.addToCart(product).then((response)=>{
          console.log('response',response)
          res.redirect('/cart');
        }).catch((err)=>{
@@ -45,7 +46,7 @@ exports.cartList = (req,res,next)=>{
    .execPopulate()
    .then((user)=>{
       console.log('user--->',user.cart.products);
-      res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:user.cart.products});
+      res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:user.cart.products,isAuth: req.session.isLoggedin});
    })
    .catch((err)=>{
       console.log('err',err);
@@ -56,7 +57,7 @@ exports.cartList = (req,res,next)=>{
 exports.orders = (req,res,next)=>{
    Orders.find({'user.userId':req.user._id}).then((orders)=>{
       console.log('orders',orders.products)
-      res.render('shop/orders.ejs',{pagetitle:"Order",orderArray:orders});
+      res.render('shop/orders.ejs',{pagetitle:"Order",orderArray:orders,isAuth: req.session.isLoggedin});
    })
 }
 
@@ -106,7 +107,7 @@ exports.productDetails = (req,res,next)=>{
  Products.findById(id).then(
      (product)=>{
         console.log('product fetched',product)
-        res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product});
+        res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product,isAuth: req.session.isLoggedin});
      }
  ).catch()
   
