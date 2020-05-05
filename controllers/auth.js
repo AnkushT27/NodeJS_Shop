@@ -1,40 +1,87 @@
 const User = require('../models/user');
+const bcrypt = require('bcryptjs');
+
 
 exports.getLogin = (req, res, next) => {
     res.render('auth/login.ejs', {
       path: '/login',
       pagetitle: 'Login',
-      isAuth:req.session.isLoggedin
+      isAuth:req.session.isLoggedin,
+      error:req.flash('error')
     });
   };
 
+  exports.getSignup = (req, res, next) => {
+    res.render('auth/signup.ejs', {
+      path: '/signup',
+      pagetitle: 'Signup',
+      isAuth:req.session.isLoggedin,
+      error:req.flash('error')
+    });
+  };
+
+  exports.postSignup = (req, res, next) => {
+     let email = req.body.email;
+     let password = req.body.password;
+     User.find({email:email}).then((userexsists)=>{
+      
+        if(userexsists.length > 0){
+          req.flash('error','User exsists');
+          res.redirect('/signup');
+        }
+        else{
+          return bcrypt.hash(password,12)
+          .then((hashedpassword)=>{
+            const user = new User({
+              name:'test',
+              email:email,
+              password:hashedpassword,
+              cart:{
+                products:[]
+              }
+            })
+            return user.save();
+           })
+           .then((addeduser)=>{
+              if(addeduser){
+                  res.redirect('/login');
+              }
+           })
+           .catch((err)=>{
+             console.log(err)
+           })
+          .catch((err)=>{
+            console.log(err)
+          })
+        }
+     })
+     .catch((err)=>{
+        console.log('err',err);
+     })
+  };
+
+
   exports.postLogin = (req, res, next) => {
-    
-    
-    User.findById('5ea44333aa857628d4b66ae7').then((fetchedUser)=>{
-      if(fetchedUser!=undefined){
-        console.log('fetchedUser',fetchedUser)
-        req.session.isLoggedin = true;
-       req.session.user = fetchedUser;
-       res.redirect('/');
+    let email = req.body.email;
+    let password = req.body.password;
+    User.find({email:email}).then(([fetchedUser])=>{
+      if(fetchedUser){
+          bcrypt.compare(password,fetchedUser.password)
+          .then((passwordMatch)=>{
+            if(passwordMatch){
+              req.session.isLoggedin = true;
+              req.session.user = fetchedUser;
+              res.redirect('/')
+            }
+            else{
+              req.flash('error','Invalid Crendentials');
+              res.redirect('/login')
+            }
+          })
        }
-      else{
-      const user = new User({
-          name:'test',
-          email:'ankushtiwai102@gmail.com',
-          cart:{
-            products:[]
-          }
-        })
-        user.save().then((saved)=>{
-          req.session.user = user;
-          req.session.isLoggedin = true;
-          res.redirect('/');
-          
-       })
-        .catch(err=>{
-          console.log('my error',err);
-        })
+       else{
+        req.flash('error','Invalid Crendentials');
+        res.redirect('/login')
        }
      })
     

@@ -6,14 +6,14 @@ exports.productList = (req,res,next)=>{
    
 Products.find().then(
    (products)=>{
-      res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop',isAuth: req.session.isLoggedin});
+      res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop'});
    }).catch((err)=>{
       console.log(err);
    });
  }
 
 exports.products = (req,res,next)=>{
-  res.render('shop/index.ejs',{pagetitle:'Products',isAuth: req.session.isLoggedin});
+  res.render('shop/index.ejs',{pagetitle:'Products'});
 }
 
 exports.deleteFromCart = (req,res,nex)=>{
@@ -46,7 +46,7 @@ exports.cartList = (req,res,next)=>{
    .execPopulate()
    .then((user)=>{
       console.log('user--->',user.cart.products);
-      res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:user.cart.products,isAuth: req.session.isLoggedin});
+      res.render('shop/cart.ejs',{pagetitle:"Cart",cartArray:user.cart.products});
    })
    .catch((err)=>{
       console.log('err',err);
@@ -57,7 +57,7 @@ exports.cartList = (req,res,next)=>{
 exports.orders = (req,res,next)=>{
    Orders.find({'user.userId':req.user._id}).then((orders)=>{
       console.log('orders',orders.products)
-      res.render('shop/orders.ejs',{pagetitle:"Order",orderArray:orders,isAuth: req.session.isLoggedin});
+      res.render('shop/orders.ejs',{pagetitle:"Order",orderArray:orders});
    })
 }
 
@@ -107,7 +107,7 @@ exports.productDetails = (req,res,next)=>{
  Products.findById(id).then(
      (product)=>{
         console.log('product fetched',product)
-        res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product,isAuth: req.session.isLoggedin});
+        res.render('shop/product-detail.ejs',{pagetitle:"Details",product:product});
      }
  ).catch()
   
