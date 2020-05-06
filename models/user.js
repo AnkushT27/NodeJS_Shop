@@ -13,6 +13,14 @@ const user = new Schema({
         type:String,
         required:true  
         },
+        resetToken:{
+        type:String,
+        required:false  
+        },
+        resetTokenTime:{
+         type:Date,
+         required:false  
+        },
         password:{
         type:String,
         required:true  

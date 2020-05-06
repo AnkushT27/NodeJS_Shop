@@ -25,7 +25,7 @@ const addProductForm = (req,res,next)=>{
 }
 
 const adminProductList = (req,res,next)=>{
-   Product.find().then((products)=>{
+   Product.find({userId:req.user._id}).then((products)=>{
         res.render('admin/list-product.ejs',{products:products,
             pagetitle:"Admin Product List",path:'/admin/add-product',isAuth: req.session.isLoggedin})
     }).
@@ -56,11 +56,16 @@ const editProduct = (req,res,next)=>{
     let id = req.body.id;
     Product.findById(id).then(
         (product)=>{
-           product.title = req.body.title;
+            if(product.userId.toString() == req.user._id.toString())
+          { product.title = req.body.title;
             product.price = req.body.price;
             product.url = req.body.url;
             product.description = req.body.desc;
            return product.save()
+          }
+          else{
+              res.redirect('/admin/product');
+          }
         })
         .then(()=>{
             res.redirect('/admin/product');
@@ -77,7 +82,7 @@ const editProduct = (req,res,next)=>{
 }
 const deleteProduct = (req,res,next)=>{
     const deleteID = req.query.productid;
-  Product.findByIdAndDelete(deleteID).then(()=>{
+  Product.deleteOne({_id:deleteID,userId:req.user._id}).then((deleted)=>{
     res.redirect('/admin/product');
    })
     .catch((err)=>{
