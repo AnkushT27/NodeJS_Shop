@@ -1,7 +1,6 @@
 const mongodb = require('mongodb');
 const Product = require('../models/product');
-
-
+const filehelper = require('../util/filehelper');
 const addProduct = (req,res,next)=>{
     console.log('my file',req.file)
     let prod = new Product(
@@ -60,6 +59,7 @@ const editProduct = (req,res,next)=>{
           { product.title = req.body.title;
             product.price = req.body.price;
             if(req.file){
+            filehelper.deleteFile(product.url);
             product.url = req.file.path;
             }
             product.description = req.body.desc;
@@ -84,7 +84,13 @@ const editProduct = (req,res,next)=>{
 }
 const deleteProduct = (req,res,next)=>{
     const deleteID = req.query.productid;
+    Product.findById(deleteID).then((product)=>{
+        filehelper.deleteFile(product.url);
+      }).catch((err)=>{
+          console.log('err',err);
+      })
   Product.deleteOne({_id:deleteID,userId:req.user._id}).then((deleted)=>{
+      
     res.redirect('/admin/product');
    })
     .catch((err)=>{
