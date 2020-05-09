@@ -7,7 +7,7 @@
 <body>
 <%- include('../shared/nav.ejs') %>  
     <main>
-        <form class="product-form" action="/admin/<% if(edit) {%>edit-product<%} else{ %>product<% } %>" method="POST">
+        <form class="product-form" action="/admin/<% if(edit) {%>edit-product?_csrf=<%=csrftoken%><%} else{ %>product?_csrf=<%=csrftoken%><% } %>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="_csrf" value="<%= csrftoken%>"/>
             <div class="form-control">
                 <label for="title">Title</label>
@@ -19,7 +19,7 @@
             </div>
             <div class="form-control">
                 <label for="url">Image URL</label>
-                <input type="text" name="url" id="url" value="<% if(edit) {%><%= product.url%><%}%>">
+                <input type="file" name="image" id="image">
             </div>
             <div class="form-control">
                 <label for="desc">Description</label>

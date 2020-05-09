@@ -11,7 +11,7 @@ const Store = require('connect-mongodb-session')(session);
 const authroute = require('./routes/auth');
 const connect = require('connect-flash');
 const csrf = require('csurf');
-
+const multer = require('multer');
 //create the server
 var app = express();
 const crossSite = csrf();
@@ -21,8 +21,13 @@ const crossSite = csrf();
 // app.set('views','views')
 app.set('view-engine','ejs');
 app.set('views','views')
-app.use(express.static(path.join(__dirname,'public')))
+app.use(express.static(path.join(__dirname,'public')));
+
+//statically serving the images
+app.use('/images',express.static(path.join(__dirname,'images')))
+
 app.use(bodyParser.urlencoded({extended:true}));
+
 const store = new Store({
   uri:'mongodb+srv://Ankush-27:test@cluster0-cqcvw.mongodb.net/shop?retryWrites=true&w=majority',
   collection:'session'
@@ -64,6 +69,27 @@ else{
   next();
 } 
 })
+
+
+const filestorage = multer.diskStorage({
+  destination:(req,file,cb)=>{
+     cb(null,'images')
+  },
+  filename:(req,file,cb)=>{
+    
+    cb(null,Date.now().toString()+'-'+file.originalname)
+  }
+})
+
+const fileFilters = (req,file,cb)=>{
+ if(file.mimetype === 'image/png' || file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg'){
+   cb(null,true);
+ }
+ else{
+   cb(null,false);
+ }
+}
+app.use(multer({storage:filestorage,fileFilter:fileFilters}).single('image'));
 app.use((req,res,next)=>{
   res.locals.isAuth = req.session.isLoggedin;
  res.locals.csrftoken = req.csrfToken()

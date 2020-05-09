@@ -3,12 +3,12 @@ const Product = require('../models/product');
 
 
 const addProduct = (req,res,next)=>{
-    
+    console.log('my file',req.file)
     let prod = new Product(
         {
         title:req.body.title,
         price:req.body.price,
-        url:req.body.url,
+        url:req.file.path,
         description:req.body.desc,
         userId:req.session.user
         }
@@ -59,7 +59,9 @@ const editProduct = (req,res,next)=>{
             if(product.userId.toString() == req.user._id.toString())
           { product.title = req.body.title;
             product.price = req.body.price;
-            product.url = req.body.url;
+            if(req.file){
+            product.url = req.file.path;
+            }
             product.description = req.body.desc;
            return product.save()
           }

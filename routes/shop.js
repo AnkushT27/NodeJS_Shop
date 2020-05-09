@@ -13,6 +13,7 @@ const isloggedin = require('../routeprotector/isloggedin');
  router.post('/delete-cart', isloggedin,shop.deleteFromCart);
  router.get('/orders',  isloggedin,shop.orders);
  router.post('/orders',  isloggedin,shop.checkout);
+ router.get('/invoice/:orderid',isloggedin,shop.getInvoice);
 
 
 module.exports = router;

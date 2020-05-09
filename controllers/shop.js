@@ -2,6 +2,9 @@ const adminData = require('../controllers/admin');
 const Products = require('../models/product');
 const Orders = require('../models/order');
 const User = require('../models/user');
+const fs = require('fs');
+const path = require('path');
+const pdfDocument = require('pdfkit');
 exports.productList = (req,res,next)=>{
    
 Products.find().then(
@@ -15,6 +18,45 @@ Products.find().then(
 exports.products = (req,res,next)=>{
   res.render('shop/index.ejs',{pagetitle:'Products'});
 }
+
+
+exports.getInvoice = (req,res,next)=>{
+  let orderId = req.params.orderid;
+  //reading stream of a file
+  Orders.findById(orderId).then((order)=>{
+     if(!order){
+      console.log('1st half');
+     }
+     if(order.user.userId.toString() != req.user._id.toString()){
+      console.log('2nd half');
+     }
+     else{
+      console.log('orderid',orderId)
+      const filePath = path.join('data','invoice',orderId+'_invoice.pdf')
+      const pdf = new pdfDocument();
+      res.setHeader('Content-Type','application/pdf');
+      res.setHeader('Content-Disposition','attatchment;filename="'+orderId+"_invoice.pdf"+'"');
+      pdf.pipe(fs.createWriteStream(filePath));
+      pdf.pipe(res);
+      pdf.text('Invoice',{
+         underline:true,
+          height:21
+      })
+      let totalPrice;
+      order.products.forEach((product)=>{
+         totalPrice =+ product.productData.price * +product.quantity
+         pdf.text(product.productData.title+'--'+product.productData.price+'*'+product.quantity);
+      });
+      pdf.text(totalPrice); 
+      pdf.end()
+      }
+  })
+  .catch((err)=>{
+   console.log('err',err);
+  })
+  
+  //pipe it to the stream
+ }
 
 exports.deleteFromCart = (req,res,nex)=>{
    console.log('this is called')

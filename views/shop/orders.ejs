@@ -13,7 +13,8 @@
             %>
              <div>
              <li>
-                 <span><%=order._id%></span>&nbsp;&nbsp;
+                 <span><%=order._id%><a href="/invoice/<%=order._id%>">Invoice</a></span>&nbsp;&nbsp;
+
                  <% order.products.forEach((product)=>{
                     %>
                  <span><%=product.productData.title%>(<%=product.quantity%>)</span>
