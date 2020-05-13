@@ -13,7 +13,9 @@ const isloggedin = require('../routeprotector/isloggedin');
  router.post('/delete-cart', isloggedin,shop.deleteFromCart);
  router.get('/orders',  isloggedin,shop.orders);
  router.post('/orders',  isloggedin,shop.checkout);
+ router.get('/checkout',  isloggedin,shop.goToCheckout);
  router.get('/invoice/:orderid',isloggedin,shop.getInvoice);
-
+ router.get('/checkout/cancel',  isloggedin,shop.goToCheckout);
+ router.get('/checkout/succcess',  isloggedin,shop.checkout);
 
 module.exports = router;

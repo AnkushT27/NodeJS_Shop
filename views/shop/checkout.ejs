@@ -3,7 +3,61 @@
 <link rel="stylesheet" href="/css/product.css">
 <link rel="stylesheet" href="/css/forms..css">
 </head>
-
-<body> 
 <%- include('../shared/nav.ejs') %>  
+<main>
+    <% if (cartArray.length > 0){
+        %>
+    <div>
+        <ul>
+           <% cartArray.forEach((cart)=>{
+            %>
+             <div>
+             <li>
+                 <span><%=cart.productID.title%></span>&nbsp;&nbsp;
+                 <span>(<%=cart.quantity%>)</span>
+                 <span>(<%=cart.productID.price%>)</span>
+            </li>
+          
+            </div>
+            <%
+            }) 
+            %>
+        </ul>
+    </div>
+    <div>
+        <span>TOTAL Price----><%=totalPrice%></span>
+        <div>
+            <button id="order" class="btn">Order Now</button>
+            <script src="https://js.stripe.com/v3/"></script>
+            <script>
+            var stripe = Stripe('pk_test_i9m5TGa3gaWTfoIGpFL0dAKN00gXBA2Udd');
+            var order = document.getElementById('order');
+            order.addEventListener('click',()=>{
+                stripe.redirectToCheckout({
+                    sessionId: '<%=sessionId%>'
+                })
+            });
+            </script>
+        </div>
+        <div>
+            
+        </div>
+    </div>
+    <form action = '/orders' method='POST'>
+        <input type="hidden" name="_csrf" value="<%=csrftoken%>"/>
+       <button type="submit" class="btn">Check OUT</button>
+    </form>
+    <%
+    }
+    else
+    {
+    %>
+    <h1>Nothing available in the cart</h1>
+    <%
+    }
+    %>
+
+</main>
+<body> 
+
 <%- include('../shared/end.ejs') %>  

@@ -27,10 +27,11 @@
             %>
         </ul>
     </div>
-    <form action = '/orders' method='POST'>
+    <!-- <form action = '/orders' method='POST'>
         <input type="hidden" name="_csrf" value="<%=csrftoken%>"/>
        <button type="submit" class="btn">Check OUT</button>
-    </form>
+    </form> -->
+    <a class="btn" href="/checkout">Check-Out</a>
     <%
     }
     else

@@ -33,12 +33,23 @@
                         <input type="hidden" name="productid" value="<%=product._id%>"/>
                     </form>
                     <% 
-                }
-                %>
+                    }
+                    %>
                 </div>
             </article>
+            <section class="pagination">
             <%
              });
+             for(var i=1;i<=limit;i++)
+             {
+            %>
+            
+            <a href="?page=<%=i%>" class="<%= currentPage == i ? 'active':''%>"><%=i%></a>
+            <% 
+            }
+            %>
+            </section>
+            <% 
              }
             else
             {

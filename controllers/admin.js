@@ -83,18 +83,22 @@ const editProduct = (req,res,next)=>{
  
 }
 const deleteProduct = (req,res,next)=>{
-    const deleteID = req.query.productid;
+    const deleteID = req.params.productId;
+    console.log('deleted---->',deleteID);
     Product.findById(deleteID).then((product)=>{
         filehelper.deleteFile(product.url);
       }).catch((err)=>{
           console.log('err',err);
       })
   Product.deleteOne({_id:deleteID,userId:req.user._id}).then((deleted)=>{
-      
-    res.redirect('/admin/product');
+    //res.redirect('/admin/product');
+    console.log('deleted---->',deleted);
+     res.status(200).json({message:'success'});
    })
     .catch((err)=>{
         console.log(err);
+        res.status(500
+            ).json({message:'failed'});
     })
 }
 

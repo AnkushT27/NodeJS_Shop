@@ -12,7 +12,7 @@ router.get('/edit-product',  isloggedin,adminController.editProductForm);
 router.post('/edit-product',  isloggedin,adminController.editProduct);
 router.post('/delete-product',  isloggedin,adminController.deleteProduct);
 router.get('/product',  isloggedin,adminController.adminProductList);
-
+router.delete('/product/:productId',isloggedin,adminController.deleteProduct);
 module.exports =
 {
     "adminRouter": router

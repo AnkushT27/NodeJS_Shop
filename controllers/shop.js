@@ -5,19 +5,77 @@ const User = require('../models/user');
 const fs = require('fs');
 const path = require('path');
 const pdfDocument = require('pdfkit');
+const ITEMS_PAGE = 3;
+const stripe = require('stripe')('sk_test_zK7aWuCqgEVIrdLO6AeUM2YU00vh1PVIFZ');
 exports.productList = (req,res,next)=>{
-   
-Products.find().then(
-   (products)=>{
-      res.render('shop/product-list.ejs',{products:products,path:'/',hasProducts:products.length>0,pagetitle:'My Shop'});
-   }).catch((err)=>{
-      console.log(err);
-   });
+const page = req.query.page || 1;
+ Products.countDocuments().then((count)=>{
+   return Products.find().skip((page-1)*ITEMS_PAGE).limit(ITEMS_PAGE)
+   .then(
+      (products)=>{
+         res.render('shop/product-list.ejs',
+         {products:products,path:'/',
+         hasProducts:products.length>0,
+         pagetitle:'My Shop',
+         count:count,
+         perPage:ITEMS_PAGE,
+         currentPage:page,
+         limit:Math.ceil(count/ITEMS_PAGE)
+      });
+      }).catch((err)=>{
+         console.log(err);
+      });
+})
+.catch((err)=>{
+   console.log('err',err);
+})
+
  }
 
 exports.products = (req,res,next)=>{
   res.render('shop/index.ejs',{pagetitle:'Products'});
 }
+
+exports.goToCheckout = (req,res,next)=>{
+   req.user.populate('cart.products.productID')
+   .execPopulate()
+   .then((user)=>{
+      console.log('user--->',user.cart.products);
+      let totalPrice = 0;
+      user.cart.products.forEach((product)=>{
+         totalPrice += product.quantity * product.productID.price;
+      });
+      return stripe.checkout.sessions.create({
+            payment_method_types:['card'],
+            line_items:user.cart.products.map((p)=>{
+               return {
+                  name:p.productID.title,
+                  description:p.productID.description,
+                  amount:p.productID.price,
+                  currency:'inr',
+                  quantity:p.quantity
+               }
+            }),
+            success_url: req.protocol + '://' + req.get('host') + '/checkout/succcess',
+            cancel_url: req.protocol + '://' + req.get('host') + '/checkout/cancel'
+      })
+      .then((session)=>{
+         res.render('shop/checkout.ejs',
+      {pagetitle:"Cart",
+      cartArray:user.cart.products,
+      totalPrice:totalPrice,
+      sessionId:session.id
+   });
+      }).catch((err)=>{
+         console.log('err',err);
+      })
+
+      
+   })
+   .catch((err)=>{
+      console.log('err',err);
+   })  
+ }
 
 
 exports.getInvoice = (req,res,next)=>{
@@ -42,9 +100,9 @@ exports.getInvoice = (req,res,next)=>{
          underline:true,
           height:21
       })
-      let totalPrice;
+      let totalPrice = 0;
       order.products.forEach((product)=>{
-         totalPrice =+ product.productData.price * +product.quantity
+         totalPrice += parseInt(product.productData.price) * parseInt(product.quantity)
          pdf.text(product.productData.title+'--'+product.productData.price+'*'+product.quantity);
       });
       pdf.text(totalPrice); 
